@@ -52,46 +52,6 @@ Voice-Sentiment-Analyzer/
 
 ---
 
-## 🚀 Getting Started
-
-### 1. Prerequisites
-- Python 3.10+
-- `pip`
-
-### 2. Installation
-
-Clone the repository:
-```bash
-git clone https://github.com/balazoro08/Voice-Sentiment-Analyzer.git
-cd Voice-Sentiment-Analyzer
-```
-
-Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Run the Application
-
-Start the FastAPI server:
-```bash
-python -m uvicorn backend.app:app --host 127.0.0.1 --port 8000
-```
-
-Open your browser and navigate to:
-```
-http://127.0.0.1:8000
-```
-
----
-
-## 🧪 Running Tests
-
-Run unit & integration tests:
-```bash
-pytest tests/test_analyzer.py
-```
-
 ---
 
 ## 📜 License
