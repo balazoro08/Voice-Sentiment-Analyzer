@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice Sentiment Analyzer | ML Speech Emotion Recognition</title>
+  <meta name="description" content="AI Voice Sentiment Analyzer. Analyzes speech characteristics, pitch, intensity, and spectral features using Librosa and ML classifiers.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="navbar">
+    <div class="brand">
+      <div class="brand-icon">
+        <i class="fa-solid => fa-waveform-lines"></i>
+        🎙️
+      </div>
+      <div>
+        <div class="brand-title">Voice Sentiment Analyzer</div>
+        <div class="brand-subtitle">Librosa & ML Speech Emotion Intelligence</div>
+      </div>
+    </div>
+    <div class="status-badge">
+      <span class="status-dot"></span>
+      Backend Engine Ready
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+    
+    <!-- Left Column: Audio Input & Recording Panel -->
+    <section class="glass-card" style="position: relative;">
+      <h2 class="section-title"><i class="fa-solid fa-microphone-lines"></i> Audio Input Source</h2>
+
+      <!-- Mode Selection Tabs -->
+      <div class="tab-buttons">
+        <button class="tab-btn active" data-tab="mic"><i class="fa-solid fa-microphone"></i> Record Voice</button>
+        <button class="tab-btn" data-tab="samples"><i class="fa-solid fa-music"></i> Test Samples</button>
+        <button class="tab-btn" data-tab="upload"><i class="fa-solid fa-cloud-arrow-up"></i> Upload File</button>
+      </div>
+
+      <!-- Tab 1: Microphone Recording -->
+      <div id="tab-mic" class="tab-panel active">
+        <div class="recorder-box">
+          <div class="visualizer-container">
+            <canvas id="audioCanvas"></canvas>
+          </div>
+
+          <div id="recTimer" class="rec-timer">00:00</div>
+
+          <div class="rec-controls">
+            <button id="btnRec" class="btn-rec" title="Start Recording">
+              <i class="fa-solid fa-microphone"></i>
+            </button>
+            <button id="btnStop" class="btn-secondary hidden" title="Stop Recording">
+              <i class="fa-solid fa-square"></i> Stop
+            </button>
+          </div>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 14px;">
+            Click microphone to record your voice. Speak clearly for 2-5 seconds.
+          </p>
+        </div>
+      </div>
+
+      <!-- Tab 2: Test Audio Samples -->
+      <div id="tab-samples" class="tab-panel">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+          Select a pre-recorded emotion clip to instantly evaluate the analyzer:
+        </p>
+        <div id="samplesGrid" class="samples-grid">
+          <!-- Dynamic Sample Cards loaded via JS -->
+        </div>
+      </div>
+
+      <!-- Tab 3: Upload Audio File -->
+      <div id="tab-upload" class="tab-panel">
+        <div id="dropzone" class="dropzone">
+          <div class="dropzone-icon"><i class="fa-solid fa-file-audio"></i></div>
+          <p style="font-weight: 600; margin-bottom: 6px;">Drag & Drop Audio File Here</p>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">Supports WAV, MP3, WEBM, OGG, FLAC</p>
+          <input type="file" id="fileInput" accept="audio/*" style="display: none;">
+        </div>
+      </div>
+
+      <!-- Active Audio Preview & Player -->
+      <div id="audioPlayerBox" class="audio-player-box hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span id="audioSourceLabel" style="font-size: 0.85rem; font-weight: 600; color: var(--primary);">
+            Ready to Analyze
+          </span>
+          <span id="audioDuration" style="font-size: 0.8rem; color: var(--text-muted);">0.0s</span>
+        </div>
+        <audio id="audioPlayer" controls></audio>
+        <button id="btnAnalyze" class="btn-analyze">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Analyze Voice Sentiment
+        </button>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p style="font-weight: 600; color: var(--primary);">Extracting Speech Features with Librosa...</p>
+      </div>
+
+    </section>
+
+    <!-- Right Column: Speech & Emotion Analytics Dashboard -->
+    <section class="glass-card">
+      <h2 class="section-title"><i class="fa-solid fa-chart-pie"></i> Emotion Analytics Dashboard</h2>
+
+      <div id="emptyState" style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+        <i class="fa-solid fa-brain" style="font-size: 3.5rem; margin-bottom: 16px; opacity: 0.4;"></i>
+        <h3 style="font-size: 1.1rem; color: var(--text-main); margin-bottom: 8px;">No Voice Analysis Loaded</h3>
+        <p style="font-size: 0.85rem;">Record your voice or choose a test sample clip to analyze emotional tone, pitch, and speech characteristics.</p>
+      </div>
+
+      <div id="resultsContainer" class="results-container hidden">
+
+        <!-- Top Hero Sentiment Card -->
+        <div class="sentiment-hero">
+          <div class="hero-left">
+            <div id="heroEmoji" class="emotion-emoji-badge">😊</div>
+            <div>
+              <div id="heroEmotion" class="emotion-name">Happy</div>
+              <div class="emotion-meta">
+                <span id="heroSentimentTag" class="tag">Positive Sentiment</span>
+                <span id="heroDurationTag" class="tag">3.2s Audio</span>
+              </div>
+            </div>
+          </div>
+          <div class="hero-right">
+            <div id="heroConfidence" class="confidence-val">88.5%</div>
+            <div class="confidence-label">Model Confidence</div>
+          </div>
+        </div>
+
+        <!-- Emotion Probability Distribution Bars -->
+        <div>
+          <h3 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; color: var(--text-main);">
+            <i class="fa-solid fa-chart-bar" style="color: var(--primary);"></i> Emotion Probability Distribution
+          </h3>
+          <div id="emotionsList" class="emotions-list">
+            <!-- Dynamic Emotion Bars -->
+          </div>
+        </div>
+
+        <!-- 2D Valence & Arousal Plot -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main);">
+              <i class="fa-solid fa-compass" style="color: var(--primary);"></i> Valence - Arousal Plane
+            </h3>
+            <span id="coordVal" style="font-size: 0.8rem; color: var(--primary); font-family: monospace;">
+              V: +0.80 | A: +0.60
+            </span>
+          </div>
+          <div class="quadrant-box">
+            <div class="quadrant-grid">
+              <div class="axis-h"></div>
+              <div class="axis-v"></div>
+              <span class="q-label q-top">High Energy (Excited / Angry)</span>
+              <span class="q-label q-bottom">Low Energy (Sad / Neutral)</span>
+              <span class="q-label q-left">Negative Tone</span>
+              <span class="q-label q-right">Positive Tone</span>
+              <div id="pointDot" class="point-dot"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acoustic Speech Metrics Grid -->
+        <div>
+          <h3 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; color: var(--text-main);">
+            <i class="fa-solid fa-wave-square" style="color: var(--primary);"></i> Acoustic Speech Characteristics
+          </h3>
+          <div class="metrics-grid">
+            
+            <div class="metric-card">
+              <div class="metric-name">Avg Pitch (F0)</div>
+              <div id="mPitch" class="metric-val">235.4 Hz</div>
+              <div id="mPitchRange" class="metric-sub">High Pitch</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-name">Pitch Std (Variation)</div>
+              <div id="mPitchStd" class="metric-val">42.1 Hz</div>
+              <div class="metric-sub">Tone Swings</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-name">Speech Pace</div>
+              <div id="mTempo" class="metric-val">138 BPM</div>
+              <div class="metric-sub">Rhythm Cadence</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-name">Loudness (RMS)</div>
+              <div id="mRms" class="metric-val">0.142</div>
+              <div id="mEnergy" class="metric-sub">High Dynamic</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-name">Timbre Centroid</div>
+              <div id="mCentroid" class="metric-val">2450 Hz</div>
+              <div class="metric-sub">Spectral Brightness</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-name">Articulation (ZCR)</div>
+              <div id="mZcr" class="metric-val">0.062</div>
+              <div id="mSharpness" class="metric-sub">Moderate Consonants</div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer>
+    Voice Sentiment Analyzer Engine • Built with Python, Librosa, Scikit-Learn & Modern Web Audio API
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
